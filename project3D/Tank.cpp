@@ -12,10 +12,7 @@ using glm::vec4;
 using glm::mat4;
 using aie::Gizmos;
 
-glm::mat4 identity = mat4(1);
-glm::mat4 tank = identity;
-glm::mat4 turret = tank * mat4(1, 0, 0, 0, 0, 1, 0, .5, 0, 0, 1, 0, 0, 0, 0, 1);
-glm::mat4 barrel = tank * mat4(1, 0, 0, .4, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1);
+
 
 Tank::Tank() {
 
@@ -52,7 +49,7 @@ void Tank::update(float deltaTime) {
 	float time = getTime();
 
 	// rotate camera
-	m_viewMatrix = glm::lookAt(vec3(0, 2, 10),
+	m_viewMatrix = glm::lookAt(vec3(0, 25, 1),
 		vec3(0), vec3(0, 1, 0));
 
 	// wipe the gizmos clean for this frame
@@ -73,33 +70,79 @@ void Tank::update(float deltaTime) {
 	// add a transform so that we can see the axis
 	Gizmos::addTransform(mat4(1));
 
-	
+	turret = tank * glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, .5, 0, 1);
+	front = tank * glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1);
+	barrel = turret * glm::mat4(cos(glm::half_pi<float>()), sin(glm::half_pi<float>()), 0, 0, -sin(glm::half_pi<float>()), cos(glm::half_pi<float>()), 0, 0, 0, 0, 1, 0, .5, 0, 0, 1);
 
-	mat4 barrelRotate = glm::rotate(barrel, glm::half_pi<float>(), vec3(0, 0, 1));
-	mat4* barrelTransform = &barrelRotate;
+	glm::mat4 * tankPtr = &tank;
+	glm::mat4 * turretPtr = &turret;
+	glm::mat4 * barrelPtr = &barrel;
+	glm::mat4 * frontPtr = &front;
 
-	mat4* turretTransform = &turret;
-	mat4* tankTransform = &tank;
 
 	// demonstrate a few shapes
 	//Gizmos::addAABBFilled(vec3(0), vec3(1.5, .5, 1), vec4(0, 0.5f, 1, 1));
 	//Gizmos::addSphere(vec3(0,.5,0), 1, 8, 8, vec4(0, 0.5f, 1, 1));
-	//Gizmos::addCylinderFilled(vec3(.4, 1, 0), .25f, 1, 10, vec4(0, 0.5f, 1, 1), barrelRotatePTR);
 
-	Gizmos::addAABBFilled(tank[3].xyz, vec3(1.5, .5, 1), vec4(0, 0.5f, 1, 1), tankTransform);
-	Gizmos::addSphere(turret[3].xyz, 1, 8, 8, vec4(0, 0.5f, 1, 1), turretTransform);
-	Gizmos::addCylinderFilled(barrel[3].xyz, .25f, 1, 10, vec4(0, 0.5f, 1, 1), barrelTransform);
+	Gizmos::addAABBFilled(tank[3].xyz, vec3(1.5, .5, 1), vec4(0, 0.5f, 1, 1), tankPtr);
+	Gizmos::addSphere(turret[3].xyz, 1, 8, 8, vec4(0, 0.5f, 1, 1), turretPtr);
+	Gizmos::addCylinderFilled(barrel[3].xyz, .2, 1, 8, white, barrelPtr);
+	Gizmos::addSphere(front[3].xyz, .75, 8, 8, vec4(0, 0.5f, 1, 1), frontPtr);
 
+
+	if (bulletExists)
+	{
+		bullet *= forwardTrans * forwardTrans;
+		Gizmos::addSphere(bullet[3].xyz, .3, 8, 8, vec4(0, 0.5f, 1, 1));
+	}
 
 	// quit if we press escape
 	aie::Input* input = aie::Input::getInstance();
 
 	if(input->isKeyDown(aie::INPUT_KEY_UP))
 	{
-		
+
+		tank *= forwardTrans;
 	}
+
+	if (input->isKeyDown(aie::INPUT_KEY_LEFT))
+	{
+		tank *= *rotLeft;
+	}
+
+	if (input->isKeyDown(aie::INPUT_KEY_DOWN))
+	{
+		tank *= backTrans;
+	}
+
+	if (input->isKeyDown(aie::INPUT_KEY_RIGHT))
+	{
+		tank *= *rotRight;
+	}
+
+	if (input->isKeyDown(aie::INPUT_KEY_SPACE))
+	{
+		shoot();
+	}
+
+	if (input->isKeyDown(aie::INPUT_KEY_A))
+	{
+		turret *= *rotLeft;
+	}
+
+	if (input->isKeyDown(aie::INPUT_KEY_D))
+	{
+		turret *= *rotRight;
+	}
+
 	if (input->isKeyDown(aie::INPUT_KEY_ESCAPE))
 		quit();
+
+	bulletTimer(deltaTime);
+	
+	if (bulletTime > 2)
+		destroyBullet();
+
 }
 
 void Tank::draw() {
@@ -117,4 +160,28 @@ void Tank::draw() {
 
 	// draw 2D gizmos using an orthogonal projection matrix (or screen dimensions)
 	Gizmos::draw2D((float)getWindowWidth(), (float)getWindowHeight());
+}
+
+void Tank::shoot()
+{
+
+	if (!bulletExists)
+	{
+		bulletExists = true;
+		bullet = front;
+	}
+}
+
+void Tank::bulletTimer(float deltaTime)
+{
+	if (bulletExists)
+	{
+		bulletTime += deltaTime;
+	}
+}
+
+void Tank::destroyBullet()
+{
+	bulletExists = false;
+	bulletTime = 0;
 }
