@@ -38,12 +38,14 @@ bool Tank::startup() {
 
 	turretO = tankC * glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, .5, 0, 1);
 	turretC = tankC * glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, .5, 0, 1);
-	frontO = tankC * glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1);
-	frontC = tankC * glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1);
-	barrelO = turretC * glm::mat4(cos(glm::half_pi<float>()), sin(glm::half_pi<float>()), 0, 0, -sin(glm::half_pi<float>()), cos(glm::half_pi<float>()), 0, 0, 0, 0, 1, 0, .5, -.25, 0, 1);
-	barrelC = turretC * glm::mat4(cos(glm::half_pi<float>()), sin(glm::half_pi<float>()), 0, 0, -sin(glm::half_pi<float>()), cos(glm::half_pi<float>()), 0, 0, 0, 0, 1, 0, .5, -.25, 0, 1);
-	barrelTipC = barrelC * glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1);
-	barrelTipO = barrelC * glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1);
+	frontO = tankC * glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, .75, 0, 0, 1);
+	frontC = tankC * glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, .75, 0, 0, 1);
+	barrelO = turretC * glm::mat4(cos(glm::half_pi<float>()), sin(glm::half_pi<float>()), 0, 
+		0, -sin(glm::half_pi<float>()), cos(glm::half_pi<float>()), 0, 0, 0, 0, 1, 0, .5, -.25, 0, 1);
+	barrelC = turretC * glm::mat4(cos(glm::half_pi<float>()), sin(glm::half_pi<float>()), 0, 
+		0, -sin(glm::half_pi<float>()), cos(glm::half_pi<float>()), 0, 0, 0, 0, 1, 0, .5, -.25, 0, 1);
+	barrelTipC = turretC;
+	barrelTipO = turretC;
 	//bulletO = barrelTipC * glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1);
 
 	return true;
@@ -60,10 +62,14 @@ void Tank::update(float deltaTime) {
 	float time = getTime();
 
 	// rotate camera
-	//m_viewMatrix = glm::lookAt(vec3(0, 25, 1),
-		//vec3(0), vec3(0, 1, 0));
-	m_viewMatrix = glm::lookAt(vec3(0, 1, 10),
+
+	//overhead view
+	m_viewMatrix = glm::lookAt(vec3(0, 25, 1),
 		vec3(0), vec3(0, 1, 0));
+
+	//side view
+	/*m_viewMatrix = glm::lookAt(vec3(0, 1, 10),
+		vec3(0), vec3(0, 1, 0));*/
 
 	// wipe the gizmos clean for this frame
 	Gizmos::clear();
@@ -71,6 +77,7 @@ void Tank::update(float deltaTime) {
 	// draw a simple grid with gizmos
 	vec4 white(1);
 	vec4 black(0, 0, 0, 1);
+	vec4 red(1, 0, 0, 1);
 	for (int i = 0; i < 21; ++i) {
 		Gizmos::addLine(vec3(-10 + i, 0, 10),
 			vec3(-10 + i, 0, -10),
@@ -87,11 +94,13 @@ void Tank::update(float deltaTime) {
 	glm::mat4 * turretPtr = &turretC;
 	glm::mat4 * barrelPtr = &barrelC;
 	glm::mat4 * frontPtr = &frontC;
+	glm::mat4 * bulletPtr = &bulletC;
 	
 	tankC = identity * tankO;
 	turretC = tankC * turretO;
 	barrelC = turretC * barrelO;
-	barrelTipC = barrelC * barrelTipO;
+	frontC = tankC * frontO;
+	barrelTipC = turretC * glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, .5, 0, 1);
 
 	// demonstrate a few shapes
 	//Gizmos::addAABBFilled(vec3(0), vec3(1.5, .5, 1), vec4(0, 0.5f, 1, 1));
@@ -100,13 +109,13 @@ void Tank::update(float deltaTime) {
 	Gizmos::addAABBFilled(tankC[3].xyz, vec3(1.5, .5, 1), vec4(0, 0.5f, 1, 1), tankPtr);
 	Gizmos::addSphere(turretC[3].xyz, 1, 8, 8, vec4(0, 0.5f, 1, 1), turretPtr);
 	Gizmos::addCylinderFilled(barrelC[3].xyz, .2, 1, 8, white, barrelPtr);
-	Gizmos::addSphere(frontC[3].xyz, .75, 8, 8, vec4(0, 0.5f, 1, 1), frontPtr);
+	Gizmos::addSphere(frontC[3].xyz, .5, 8, 8, red, frontPtr);
 
 
 	if (bulletExists)
 	{
 		bulletC *= forwardTrans * forwardTrans;
-		Gizmos::addSphere(bulletC[3].xyz, .3, 8, 8, vec4(0, 0.5f, 1, 1));
+		Gizmos::addSphere(bulletC[3].xyz, .3, 8, 8, vec4(0, 0.5f, 1, 1), bulletPtr);
 	}
 
 	// quit if we press escape
@@ -181,7 +190,7 @@ void Tank::shoot()
 	if (!bulletExists)
 	{
 		bulletExists = true;
-		bulletC = { turretC[0].xyzw, turretC[1].xyzw, turretC[2].xyzw, turretC[3].xyzw * glm::vec4(3, 3, 0, 1)};
+		bulletC = barrelTipC;
 	}
 }
 
