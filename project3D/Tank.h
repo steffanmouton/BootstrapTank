@@ -25,11 +25,23 @@ protected:
 	float bulletTime = 0;
 
 	const glm::mat4 identity = glm::mat4(1);
-	glm::mat4 tank = identity;
-	glm::mat4 turret;
-	glm::mat4 front;
-	glm::mat4 barrel;
-	glm::mat4 bullet;
+	glm::mat4 tankC = identity;
+	glm::mat4 tankO = identity;
+
+	glm::mat4 turretC;
+	glm::mat4 turretO;
+
+	glm::mat4 frontC;
+	glm::mat4 frontO;
+
+	glm::mat4 barrelC;
+	glm::mat4 barrelO;
+	glm::mat4 barrelTipC;
+	glm::mat4 barrelTipO;
+
+
+	glm::mat4 bulletC;
+	glm::mat4 bulletO;
 
 	glm::mat4 forwardTrans = glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, .05, 0, 0, 1);
 	glm::mat4 backTrans = glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -.05, 0, 0, 1);
