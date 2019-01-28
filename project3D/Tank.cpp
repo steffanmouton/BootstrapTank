@@ -46,7 +46,6 @@ bool Tank::startup() {
 		0, -sin(glm::half_pi<float>()), cos(glm::half_pi<float>()), 0, 0, 0, 0, 1, 0, .5, -.25, 0, 1);
 	barrelTipC = turretC;
 	barrelTipO = turretC;
-	//bulletO = barrelTipC * glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1);
 
 	return true;
 }
@@ -67,7 +66,7 @@ void Tank::update(float deltaTime) {
 	m_viewMatrix = glm::lookAt(vec3(0, 25, 1),
 		vec3(0), vec3(0, 1, 0));
 
-	//side view
+	//side view - uncomment to change camera
 	/*m_viewMatrix = glm::lookAt(vec3(0, 1, 10),
 		vec3(0), vec3(0, 1, 0));*/
 
@@ -101,10 +100,6 @@ void Tank::update(float deltaTime) {
 	barrelC = turretC * barrelO;
 	frontC = tankC * frontO;
 	barrelTipC = turretC * glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, .5, 0, 1);
-
-	// demonstrate a few shapes
-	//Gizmos::addAABBFilled(vec3(0), vec3(1.5, .5, 1), vec4(0, 0.5f, 1, 1));
-	//Gizmos::addSphere(vec3(0,.5,0), 1, 8, 8, vec4(0, 0.5f, 1, 1));
 
 	Gizmos::addAABBFilled(tankC[3].xyz, vec3(1.5, .5, 1), vec4(0, 0.5f, 1, 1), tankPtr);
 	Gizmos::addSphere(turretC[3].xyz, 1, 8, 8, vec4(0, 0.5f, 1, 1), turretPtr);
