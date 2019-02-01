@@ -21,10 +21,18 @@ protected:
 	glm::mat4	m_viewMatrix;
 	glm::mat4	m_projectionMatrix;
 
+	//trackers for the bullet to draw correctly
 	bool bulletExists = false;
 	float bulletTime = 0;
 
+	glm::mat4 bulletC;
+	glm::mat4 bulletO;
+
+	//identity matrix for consistency
 	const glm::mat4 identity = glm::mat4(1);
+
+	//matrices that track the individual parts of the tank
+	
 	glm::mat4 tankC = identity;
 	glm::mat4 tankO = identity;
 
@@ -37,19 +45,18 @@ protected:
 	glm::mat4 barrelC;
 	glm::mat4 barrelO;
 	glm::mat4 barrelTipC;
-	glm::mat4 barrelTipO;
 
-
-	glm::mat4 bulletC;
-	glm::mat4 bulletO;
-
+	//Transform matrices used in moving the tank by multiplying with current transform
 	glm::mat4 forwardTrans = glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, .05, 0, 0, 1);
 	glm::mat4 backTrans = glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -.05, 0, 0, 1);
 	glm::mat4 *rotLeft = new glm::mat4(cos(.025), 0, -sin(.025), 0, 0, 1, 0, 0, sin(.025), 0, cos(.025), 0, 0, 0, 0, 1);
 	glm::mat4 *rotRight = new glm::mat4(cos(-.025), 0, -sin(-.025), 0, 0, 1, 0, 0, sin(-.025), 0, cos(-.025), 0, 0, 0, 0, 1);
 
+	//fires a bullet
 	void shoot();
+	//tracks lifetime of bullet
 	void bulletTimer(float deltaTime);
+	//removes bullet from screen
 	void destroyBullet();
 };
 

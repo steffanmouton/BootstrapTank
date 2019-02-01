@@ -36,6 +36,7 @@ bool Tank::startup() {
 		getWindowWidth() / (float)getWindowHeight(),
 		0.1f, 1000.f);
 
+	//initial definition of matrices that track the individual parts of the tank
 	turretO = tankC * glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, .5, 0, 1);
 	turretC = tankC * glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, .5, 0, 1);
 	frontO = tankC * glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, .75, 0, 0, 1);
@@ -45,7 +46,6 @@ bool Tank::startup() {
 	barrelC = turretC * glm::mat4(cos(glm::half_pi<float>()), sin(glm::half_pi<float>()), 0, 
 		0, -sin(glm::half_pi<float>()), cos(glm::half_pi<float>()), 0, 0, 0, 0, 1, 0, .5, -.25, 0, 1);
 	barrelTipC = turretC;
-	barrelTipO = turretC;
 
 	return true;
 }
@@ -89,12 +89,16 @@ void Tank::update(float deltaTime) {
 	// add a transform so that we can see the axis
 	Gizmos::addTransform(mat4(1));
 
+	//updating the current position of objects on screen
+
+	//pointers for use in bootstrap gizmo drawing
 	glm::mat4 * tankPtr = &tankC;
 	glm::mat4 * turretPtr = &turretC;
 	glm::mat4 * barrelPtr = &barrelC;
 	glm::mat4 * frontPtr = &frontC;
 	glm::mat4 * bulletPtr = &bulletC;
-	
+
+	//logic for updating all the parts of the tank moving together
 	tankC = identity * tankO;
 	turretC = tankC * turretO;
 	barrelC = turretC * barrelO;
@@ -106,7 +110,7 @@ void Tank::update(float deltaTime) {
 	Gizmos::addCylinderFilled(barrelC[3].xyz, .2, 1, 8, white, barrelPtr);
 	Gizmos::addSphere(frontC[3].xyz, .5, 8, 8, red, frontPtr);
 
-
+	//logic for drawing the bullet to the screen
 	if (bulletExists)
 	{
 		bulletC *= forwardTrans * forwardTrans;
@@ -116,9 +120,9 @@ void Tank::update(float deltaTime) {
 	// quit if we press escape
 	aie::Input* input = aie::Input::getInstance();
 
+	//user input controls for the tank
 	if(input->isKeyDown(aie::INPUT_KEY_UP))
 	{
-
 		tankO *= forwardTrans;
 	}
 
@@ -155,11 +159,12 @@ void Tank::update(float deltaTime) {
 	if (input->isKeyDown(aie::INPUT_KEY_ESCAPE))
 		quit();
 
+	//updating lifetime of bullet
 	bulletTimer(deltaTime);
-	
+
+	//remove bullet from game if it has existed for more than 2 seconds
 	if (bulletTime > 2)
 		destroyBullet();
-
 }
 
 void Tank::draw() {
@@ -181,7 +186,8 @@ void Tank::draw() {
 
 void Tank::shoot()
 {
-
+	//initial check to see if there is already a bullet. Will not draw a new bullet if 
+	//one already exists
 	if (!bulletExists)
 	{
 		bulletExists = true;
@@ -191,6 +197,7 @@ void Tank::shoot()
 
 void Tank::bulletTimer(float deltaTime)
 {
+	//tracks lifetime of bullet while it exists
 	if (bulletExists)
 	{
 		bulletTime += deltaTime;
@@ -199,6 +206,7 @@ void Tank::bulletTimer(float deltaTime)
 
 void Tank::destroyBullet()
 {
+	//destroys the bullet and resets lifetime to 0
 	bulletExists = false;
 	bulletTime = 0;
 }
